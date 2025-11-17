@@ -77,30 +77,75 @@ DSD Diagram: Physical database structure including table names, attributes, and 
 
 
 💾 Data Insertion Methods
+The system implements three comprehensive data-insertion methods, each fully documented and tested to ensure reproducibility and flexibility. 
 
-Three different data insertion methods were implemented as required:
+All methods have been executed successfully and organized into dedicated folders with complete supporting files.
 
-Manual SQL Inserts:
+1️⃣ CSV-Based Data Import
 
-Implemented in insertTables.sql.
+This method leverages CSV files as the primary data source, enabling efficient bulk loading into the database.
 
-Inserts sample data into all relevant tables.
+Process:
 
-Programming-Based Insertion:
+Dedicated CSV files were created for each table in the database.
+Each file includes realistic sample data
+Using PostgreSQL's built-in Import tool, each CSV file is loaded directly into its corresponding table
+PostgreSQL internally converts imported rows into INSERT operations, efficiently populating the database
 
-Implemented via code in the Programming folder.
+Documentation:
 
-The program generates and executes SQL INSERT statements automatically.
+All CSV files are located in the DataImportFiles folder
 
-Includes both source code and output examples.
+Best Use Case: Ideal for loading structured bulk data from external sources or existing datasets.
 
-Data Import from Files:
+2️⃣ Automated SQL Generation Using Python
 
-Implemented via the DataImportFiles folder.
+A Python program was developed to automatically generate realistic SQL INSERT statements, streamlining the creation of large test datasets.
 
-Includes configuration files and CSV data sources used for import.
+Process:
 
-Each folder contains the files relevant to the chosen insertion method.
+The script generates realistic random data including names, addresses, phone numbers, emails, and birthdates
+SQL statements are created for multiple tables: person, student, and participate_in
+The program outputs a complete .sql file containing hundreds of ready-to-execute INSERT commands
+This SQL file can be directly executed in PostgreSQL to populate the database
+
+Documentation:
+
+All Python source code is located in the Programming folder
+The generated SQL file (with all insert statements) is included for reference
+
+Best Use Case: Perfect for creating large, realistic datasets for testing, demonstration, or development purposes.
+
+3️⃣ Manual SQL INSERT File
+
+A traditional SQL insert file provides a straightforward method for baseline data population.
+
+Process:
+
+The file insertTables.sql contains manually written INSERT commands
+Includes comprehensive sample data for all major entities:
+
+Students
+
+Teachers
+
+Sports classes
+
+Class groups
+
+Equipment
+
+Locations
+
+
+Can be executed directly in any SQL environment without additional tools
+
+Documentation:
+
+Located in the SQL_Inserts folder (or root project directory)
+
+Best Use Case: Ideal for clear examples, controlled baseline data, and scenarios where automation tools are unavailable.
+
 
 🗄️ Backup and Restore
 
