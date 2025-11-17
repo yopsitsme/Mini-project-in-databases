@@ -77,6 +77,7 @@ DSD Diagram: Physical database structure including table names, attributes, and 
 
 
 💾 Data Insertion Methods
+
 The system implements three comprehensive data-insertion methods, each fully documented and tested to ensure reproducibility and flexibility. 
 
 All methods have been executed successfully and organized into dedicated folders with complete supporting files.
