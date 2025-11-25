@@ -4,7 +4,7 @@
 -- Adjusts sports class costs based on enrollment patterns, age demographics, and location demand
 -- Includes complex date analysis for seasonal adjustments and student age calculations
 -- Used by: Finance team and pricing strategists for revenue optimization
-
+BEGIN;
 UPDATE sports_class
 SET cost = CASE
     WHEN demand_metrics.avg_occupancy_rate >= 90 AND demand_metrics.waitlist_indicator = 'High Demand'
@@ -63,3 +63,5 @@ FROM (
     HAVING COUNT(DISTINCT g.id) >= 1  -- Class must have at least 1 group
 ) AS demand_metrics
 WHERE sports_class.id = demand_metrics.class_id;
+--ROLLBACK;
+--COMMIT;
