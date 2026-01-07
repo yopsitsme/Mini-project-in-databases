@@ -726,8 +726,557 @@ Stage 2 Achievements:
 Result: A production-ready system that actively protects data quality and provides valuable business insights.
 
 
+# 🔄 Database Integration Project - Stage 3
+## Comprehensive System Integration Documentation
 
+## 🎯 Project Overview
 
+### Objective
+This stage focused on **database integration** - merging two independent systems into a unified, cohesive database structure. The challenge was to combine our **Sports Enrollment System** with a received **Activities Management System** while maintaining data integrity and operational functionality.
+
+### Source Systems
+
+#### 🏀 System A: Sports Enrollment System (Our Original)
+**Database:** `BD_Proj_5494_2032` (backup2.sql)
+- **Primary Focus:** Sports class management and enrollment tracking
+- **Key Entities:** Sports classes, enrollment groups, teachers, students, locations
+- **Core Functionality:** Class scheduling, capacity management, revenue tracking
+- **Unique Features:** Real-time enrollment status, capacity-based triggers
+
+#### 🎨 System B: Activities Management System (Received)
+**Database:** `full_backup.sql`
+- **Primary Focus:** Educational activities and program coordination  
+- **Key Entities:** Activities (Dance, Piano, etc.), groups, instructors, grade levels
+- **Core Functionality:** Activity scheduling, instructor assignments, room management
+- **Unique Features:** Grade-level targeting, weekly session scheduling
+
+---
+
+## 🔄 Integration Process
+
+### Phase 1: Reverse Engineering 📐
+
+#### ✏️ Step 1: DSD Creation
+We received the backup file from the partner team and reconstructed their **Database Schema Diagram (DSD)** by analyzing:
+- Table structures and column definitions
+- Primary and foreign key relationships
+- Data types and constraints
+- Existing indexes and triggers
+
+#### ✏️ Step 2: ERD Reconstruction  
+From the DSD, we performed **reverse engineering** to create the conceptual **Entity-Relationship Diagram (ERD)**, identifying:
+- Core entities and their attributes
+- Relationship types (one-to-one, one-to-many, many-to-many)
+- Cardinality and participation constraints
+- Business rules embedded in the schema
+
+### Phase 2: Integration Design 🎨
+
+#### ✏️ Step 3: ERD Analysis
+At this point, we had **two complete ERDs**:
+- Our original Sports System ERD
+- The reconstructed Activities System ERD
+
+#### ✏️ Step 4: Combined ERD Design
+We designed a **unified ERD** that merged both systems, making critical design decisions:
+
+**Key Integration Decisions:**
+
+| Decision Area |       Approach        | Rationale |
+|---------------|-----------------------|-----------|
+| **Person Entity** | Created inheritance hierarchy | Both systems had people entities (students, teachers, parents, instructors) - unified under common Person base |
+| **Location Management** | School-centric model | Merged location concepts - renamed to `school_name` to reflect educational context |
+| **Group Structure** | Unified Group_Of_Sports | Combined `group_of_sports` and `grps` tables with offset IDs to prevent conflicts |
+| **Scheduling** | Centralized Group_Details | Extracted scheduling from multiple sources into dedicated `Group_Details` table |
+| **Year Groups** | Added to all groups | Extended our system with year group concept from received system |
+| **ID Strategy** | Offset-based migration | Applied systematic offsets (10000, 20000, 30000) to prevent primary key conflicts |
+
+---
+
+## ⚙️ Technical Implementation
+
+### Phase 3: Database Transformation 🔨
+
+#### ✅ Stage 1: Person Hierarchy Transformation
+
+**Objective:** Create a unified person entity with proper inheritance structure
+
+**Implementation Steps:**
+
+1. **Name Decomposition** 📝
+   ```sql
+   -- Split full names into first_name and last_name
+   UPDATE Person SET 
+       first_name = SPLIT_PART(name, ' ', 1),
+       last_name = SUBSTRING(name FROM POSITION(' ' IN name) + 1)
+   ```
+   - **Why:** Different naming conventions required standardization
+   - **Impact:** Unified person data format across both systems
+
+2. **ID Standardization** 🔑
+   ```sql
+   -- Rename columns for consistency
+   ALTER TABLE Person RENAME COLUMN id TO personId;
+   ALTER TABLE Student RENAME COLUMN id TO studentId;
+   ALTER TABLE Teacher RENAME COLUMN id TO teacherId;
+   ```
+   - **Why:** Entity-specific naming improves clarity
+   - **Impact:** Self-documenting foreign key relationships
+
+3. **Parent Integration** 👨‍👩‍👧
+   ```sql
+   -- Migrate parents to Person hierarchy with offset
+   INSERT INTO Person (personId, first_name, last_name, email, phone)
+   SELECT parentId + 10000, first_name, last_name, email, phone
+   FROM Parent
+   ```
+   - **Offset Used:** +10000 for all parent IDs
+   - **Why:** Prevents ID collision with existing Person records
+   - **Result:** Parents now inherit from Person entity
+
+4. **Student Migration** 🎓
+   ```sql
+   -- Import students from backup2 with offset
+   INSERT INTO Person (personId, first_name, last_name, birth_date)
+   SELECT student_id + 20000, first_name, last_name, birth_date
+   FROM temp_students
+   ```
+   - **Offset Used:** +20000 for all student IDs
+   - **Why:** Separates student ID space from parents and original persons
+   - **Result:** All students accessible through Person table
+
+5. **Instructor Integration** 👨‍🏫
+   ```sql
+   -- Migrate instructors to Teacher entity
+   INSERT INTO Person (personId, first_name, last_name, email, phone)
+   SELECT instructor_id + 30000, first_name, last_name, email, phone
+   FROM temp_instructors
+   
+   INSERT INTO Teacher (teacherId, specialty)
+   SELECT instructor_id + 30000, specialty
+   FROM temp_instructors
+   ```
+   - **Offset Used:** +30000 for all instructor IDs
+   - **Why:** Unifies teaching staff under single Teacher entity
+   - **Benefit:** Added specialty field from received system to our Teacher table
+
+#### ✅ Stage 2: Location and Scheduling Transformation
+
+**Objective:** Unify location concepts and centralize scheduling information
+
+**Implementation Steps:**
+
+1. **Location Unification** 🏫
+   ```sql
+   -- Rename to reflect school-centric model
+   ALTER TABLE Location RENAME COLUMN location_name TO school_name;
+   ```
+   - **Why:** Both systems had location entities with different semantics
+   - **Decision:** Adopted school-centric terminology as more descriptive
+
+2. **Scheduling Centralization** 📅
+   ```sql
+   -- Rename and restructure scheduling table
+   ALTER TABLE weeklysessions RENAME TO Group_Details;
+   ALTER TABLE Group_Details RENAME COLUMN session_id TO timeId;
+   ```
+   - **Why:** Scheduling was scattered across multiple tables
+   - **Result:** Single source of truth for all group schedules
+
+3. **Group ID Standardization** 🔢
+   ```sql
+   -- Standardize group identification
+   ALTER TABLE Group_Of_Sports RENAME COLUMN id TO groupId;
+   ```
+   - **Why:** Consistent naming convention across all entities
+   - **Benefit:** Improved code readability and maintainability
+
+#### ✅ Stage 3: Group and Enrollment Integration
+
+**Objective:** Merge group structures and preserve all enrollment data
+
+**Implementation Steps:**
+
+1. **Group Migration** 🏃
+   ```sql
+   -- Import groups from received system with offset
+   INSERT INTO Group_Of_Sports (groupId, teacher_id, sports_class_id, yeargroup_id)
+   SELECT 
+       group_id + 2000,           -- Offset to prevent conflicts
+       instructor_id + 30000,      -- Link to migrated instructors
+       activity_id,                -- Map activities to sports classes
+       yeargroup_id                -- Preserve grade level associations
+   FROM temp_grps
+   ```
+   - **Offset Used:** +2000 for all imported group IDs
+   - **Why:** Prevents collision with existing group records
+   - **Key Mapping:** Activities → Sports Classes (direct mapping, no offset needed)
+
+2. **Schedule Migration** ⏰
+   ```sql
+   -- Move scheduling data from Group_Of_Sports to Group_Details
+   INSERT INTO Group_Details (group_id, day_of_week, start_time)
+   SELECT groupId, day_in_the_week, start_time
+   FROM Group_Of_Sports
+   WHERE day_in_the_week IS NOT NULL
+   ```
+   - **Why:** Normalize scheduling to dedicated table
+   - **Result:** Clean separation of group metadata and timing
+
+3. **Enrollment Integration** 📝
+   ```sql
+   -- Preserve student enrollments from both systems
+   INSERT INTO Participate_In (studentId, groupId, enrollment_date)
+   SELECT 
+       student_id + 20000,  -- Reference migrated students
+       group_id + 2000,     -- Reference migrated groups
+       enrollment_date      -- Preserve historical data
+   FROM temp_studentgroups
+   ```
+   - **Result:** All enrollments preserved with full history
+   - **Validation:** Triggers ensure capacity constraints still respected
+
+#### ✅ Stage 4: Relationship Establishment
+
+**Objective:** Create proper foreign key relationships for data integrity
+
+**Implementation Steps:**
+
+1. **Year Group Integration** 🎯
+   ```sql
+   -- Add year group support to all groups
+   ALTER TABLE Group_Of_Sports ADD COLUMN yeargroup_id INTEGER;
+   ALTER TABLE Group_Of_Sports ADD CONSTRAINT group_yeargroup_fkey 
+       FOREIGN KEY (yeargroup_id) REFERENCES yeargroups(yeargroup_id);
+   ```
+   - **Why:** Received system had grade-level targeting we wanted to adopt
+   - **Benefit:** Groups now properly categorized by student age/grade
+
+2. **Location-Year Group Bridge** 🌉
+   ```sql
+   -- Create many-to-many relationship table
+   CREATE TABLE Takes_Place (
+       yeargroup_id INTEGER NOT NULL,
+       location_id INTEGER NOT NULL,
+       PRIMARY KEY (yeargroup_id, location_id)
+   );
+   
+   -- Populate all combinations (all grades at all locations)
+   INSERT INTO Takes_Place (yeargroup_id, location_id)
+   SELECT yg.yeargroup_id, l.id
+   FROM yeargroups yg CROSS JOIN Location l;
+   ```
+   - **Why:** Year groups can be offered at multiple locations
+   - **Design Choice:** Initially populated with all combinations (can be refined later)
+
+3. **Student-Parent Linking** 👪
+   ```sql
+   -- Establish parent relationship
+   ALTER TABLE Student ADD COLUMN parentId INTEGER;
+   ALTER TABLE Student ADD CONSTRAINT student_parent_fkey 
+       FOREIGN KEY (parentId) REFERENCES Parent(parentId);
+   ```
+   - **Result:** Students properly linked to their parents in unified hierarchy
+
+#### ✅ Stage 5: Business Logic Migration
+
+**Objective:** Preserve and update triggers for capacity management
+
+**Implementation Steps:**
+
+1. **Capacity Check Trigger** 🚦
+   ```sql
+   CREATE TRIGGER trg_check_capacity_before_insert
+   BEFORE INSERT ON Participate_In
+   FOR EACH ROW EXECUTE FUNCTION check_group_capacity_before_insert();
+   ```
+   - **Purpose:** Prevent over-enrollment in groups
+   - **Updated:** Column names changed to match new schema (groupId, studentId)
+
+2. **Status Update Triggers** 📊
+   ```sql
+   CREATE TRIGGER trg_insert_participate
+   AFTER INSERT ON Participate_In
+   FOR EACH ROW EXECUTE FUNCTION update_group_status_on_insert();
+   
+   CREATE TRIGGER trg_delete_participate
+   AFTER DELETE ON Participate_In
+   FOR EACH ROW EXECUTE FUNCTION update_group_status_on_delete();
+   ```
+   - **Purpose:** Automatically manage group status (PENDING/ACTIVE/FULL)
+   - **Logic:** 
+     - PENDING: < 5 students
+     - ACTIVE: 5+ students, below capacity
+     - FULL: at capacity
+
+3. **Performance Optimization** ⚡
+   ```sql
+   -- Create indexes on all foreign keys
+   CREATE INDEX idx_group_teacher ON Group_Of_Sports(teacher_id);
+   CREATE INDEX idx_participate_student ON Participate_In(studentId);
+   CREATE INDEX idx_student_parent ON Student(parentId);
+   ```
+   - **Why:** Large joined tables require indexing for performance
+   - **Result:** Query performance maintained despite increased data volume
+
+---
+
+## 📊 Views and Queries
+
+### View Design Philosophy 🎨
+
+We created **two analytical views**, one representing each original system's perspective:
+- Views abstract complex joins into simple, queryable interfaces
+- Each view combines multiple tables to provide business-relevant insights
+- Queries demonstrate practical use cases for system stakeholders
+
+---
+
+### 🏀 View 1: Sports Enrollment Analysis
+**Perspective:** Original Sports System
+
+#### 📋 View Definition
+
+```sql
+CREATE VIEW sports_enrollment_analysis AS
+SELECT 
+    g.groupId,
+    sc.name AS class_name,           
+    g.level,                          
+    g.status,                        
+    g.current_amount,            
+    sc.capacity,                  
+    sc.capacity - g.current_amount AS spots_left,  -- Available openings
+    sc.cost,                          
+    p.first_name || ' ' || p.last_name AS teacher_name,
+    p.email AS teacher_email,
+    l.school_name,           
+    l.city,
+    gd.day_of_week,            
+    gd.start_time                  
+FROM Group_Of_Sports g
+INNER JOIN Sports_Class sc ON g.sports_class_id = sc.id
+INNER JOIN Teacher t ON g.teacher_id = t.teacherId
+INNER JOIN Person p ON t.teacherId = p.personId
+INNER JOIN Takes_Place tp ON g.yeargroup_id = tp.yeargroup_id
+INNER JOIN Location l ON tp.location_id = l.id
+INNER JOIN Group_Details gd ON g.groupId = gd.group_id;
+```
+
+#### 🎯 View Purpose
+Provides a **complete enrollment management dashboard** combining:
+- Class offerings and capacity
+- Real-time availability tracking
+- Teacher assignments
+- Location and schedule details
+- Revenue information
+
+#### 💡 Business Value
+- **Customer Service:** Quickly find available classes for prospective students
+- **Operations:** Monitor capacity utilization across locations
+- **Finance:** Calculate revenue potential and enrollment trends
+- **Management:** Assess teacher workload and location performance
+
+---
+
+#### 🔍 Query 1.1: Available Classes Report
+
+**Purpose:** Find all active classes currently accepting enrollments
+
+```sql
+SELECT 
+    class_name,          
+    level,               
+    day_of_week,         
+    start_time,           
+    current_amount,    
+    spots_left,           
+    cost,               
+    teacher_name,     
+    school_name,         
+    city            
+FROM sports_enrollment_analysis
+WHERE status = 'ACTIVE'               -- Must be active (not pending/full)
+    AND spots_left > 0                -- Must have openings
+ORDER BY spots_left DESC, cost;       -- Most available first, then by price
+```
+
+**Use Case:** Customer service representative helping a parent find suitable classes
+
+**Business Insight:** Classes are prioritized by availability, helping quickly fill classes nearing minimum thresholds while also considering price sensitivity.
+
+---
+
+#### 📈 Query 1.2: Location Revenue Analysis
+
+**Purpose:** Aggregate enrollment and revenue statistics by location
+
+```sql
+SELECT 
+    school_name,                               
+    city,                                        
+    COUNT(groupId) AS total_groups,                -- Number of groups/classes
+    SUM(current_amount) AS total_enrolled,         -- Total students across all groups
+    SUM(current_amount * cost) AS potential_revenue, -- Revenue calculation
+    AVG(current_amount) AS avg_enrollment,         -- Average class size
+    MIN(spots_left) AS min_spots_available,        -- Least available class
+    MAX(spots_left) AS max_spots_available         -- Most available class
+FROM sports_enrollment_analysis
+GROUP BY school_name, city          -- Aggregate by location
+HAVING SUM(current_amount) > 0      -- Only locations with students
+ORDER BY potential_revenue DESC;    -- Highest revenue locations first
+```
+
+**Use Case:** Management reviewing location performance for strategic planning
+
+**Business Insight:** Identifies highest-performing locations by revenue and enrollment efficiency, informing decisions about resource allocation and expansion.
+
+---
+
+### 🎨 View 2: Activity Participation Summary
+**Perspective:** Received Activities System
+
+#### 📋 View Definition
+
+```sql
+CREATE VIEW activity_participation_summary AS
+SELECT 
+    a.activity_id,
+    a.activity_name,                          
+    a.description,                            
+    a.min_age,                                
+    a.max_age,                               
+    g.groupId,
+    g.yeargroup_id,                               -- Grade level
+    yg.grade_name,                                -- Grade name (e.g., "Grade 3")
+    p.first_name || ' ' || p.last_name AS instructor_name,
+    t.specialty,                               
+    p.email AS instructor_email,
+    gd.day_of_week,                              
+    gd.start_time,                           
+    gd.end_time,                               
+    gd.room,                               
+    l.school_name,                         
+    l.city                                    
+FROM Sports_Class a                               -- "Activities" mapped to Sports_Class
+INNER JOIN Group_Of_Sports g ON a.id = g.sports_class_id
+INNER JOIN yeargroups yg ON g.yeargroup_id = yg.yeargroup_id
+INNER JOIN Teacher t ON g.teacher_id = t.teacherId
+INNER JOIN Person p ON t.teacherId = p.personId
+INNER JOIN Group_Details gd ON g.groupId = gd.group_id
+INNER JOIN Takes_Place tp ON g.yeargroup_id = tp.yeargroup_id
+INNER JOIN Location l ON tp.location_id = l.id;
+```
+
+#### 🎯 View Purpose
+Provides a **comprehensive activity program catalog** combining:
+- Activity offerings with age ranges
+- Grade level targeting
+- Instructor assignments and specialties
+- Complete scheduling (day, time, room)
+- Location availability
+
+#### 💡 Business Value
+- **Program Coordination:** Manage diverse activity offerings across locations
+- **Instructor Management:** Track instructor assignments and specialties
+- **Family Communication:** Provide complete schedule information
+- **Resource Planning:** Optimize room utilization and avoid conflicts
+
+---
+
+#### 🔍 Query 2.1: Dance and Piano Programs
+
+**Purpose:** List all Dance and Piano offerings with complete details
+
+```sql
+SELECT 
+    activity_name,    
+    grade_name,           -- Target grade level
+    instructor_name,      
+    specialty,           
+    day_of_week,        
+    start_time,           
+    end_time,           
+    room,                 
+    school_name,      
+    city                 
+FROM activity_participation_summary
+WHERE activity_name IN ('Dance', 'Piano')     -- Filter specific activities
+ORDER BY activity_name, day_of_week, start_time; -- Chronological order
+```
+
+**Use Case:** Parent researching enrichment activities for their child
+
+**Business Insight:** Families can compare offerings across locations and times, while administrators see instructor schedules and room usage patterns.
+
+---
+
+#### 📊 Query 2.2: Activity Program Statistics
+
+**Purpose:** Analyze program breadth and resource allocation
+
+```sql
+SELECT 
+    activity_name,                            ]
+    COUNT(DISTINCT groupId) AS number_groups,    -- How many sections offered
+    COUNT(DISTINCT instructor_name) AS num_instructors, -- Instructor coverage
+    MIN(min_age) AS youngest_age,                -- Minimum age served
+    MAX(max_age) AS oldest_age,                  -- Maximum age served
+    COUNT(DISTINCT school_name) AS num_locations -- Location availability
+FROM activity_participation_summary
+GROUP BY activity_name              -- Aggregate by activity
+HAVING COUNT(DISTINCT groupId) > 0  -- Only activities with active groups
+ORDER BY number_groups DESC;        -- Most popular first
+```
+
+**Use Case:** Program director evaluating activity portfolio
+
+**Business Insight:** Reveals which activities have highest demand (multiple groups), adequate instructor coverage, and age range served. Informs hiring and program development decisions.
+
+---
+
+## ✅ Results and Achievements
+
+### Key Achievements 🏆
+
+#### 1. ✅ Successful Person Hierarchy
+- Unified 4 person-related entities (students, teachers, parents, instructors)
+- Clean inheritance structure with proper foreign keys
+- Zero data loss during migration
+
+#### 2. ✅ Preserved Business Logic
+- All capacity management triggers functional
+- Status updates working across migrated data
+- Enrollment constraints respected
+
+#### 3. ✅ Comprehensive Views
+- Both system perspectives represented
+- Complex joins simplified into queryable interfaces
+- Practical queries demonstrate real business value
+
+#### 4. ✅ Data Integrity Maintained
+- All foreign key relationships validated
+- Referential integrity enforced
+- No orphaned records
+
+#### 5. ✅ Scalable Architecture
+- Offset strategy allows future integrations
+- Normalized structure reduces redundancy
+- Indexed for performance at scale
+
+---
+
+## 🎓 Conclusion
+
+This integration project successfully merged two independent database systems into a unified, functional whole. By following a systematic approach - reverse engineering, design integration, and careful implementation - we created a robust combined system that:
+
+- ✅ Preserves all data from both sources
+- ✅ Maintains operational business logic  
+- ✅ Provides analytical views for both perspectives
+- ✅ Scales to accommodate future growth
+- ✅ Documents all decisions and transformations
+
+The resulting unified database serves both the sports enrollment and activities management use cases while maintaining the unique characteristics and requirements of each system.
 
 
 
