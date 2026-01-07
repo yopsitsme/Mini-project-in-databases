@@ -1,11 +1,11 @@
 Submitters: Chana Perel Kats, Rachel Lea Izchaki
 
+# 📘 Sports Class Management System
 
-📘 Sports Class Management System
+# 🔄 Stage 1
+## System Specification and Implementation Files
 
-
-Stage 1 – System Specification and Implementation Files
-
+## 🎯 Project Overview
 
 🏁 Introduction
 
@@ -154,11 +154,9 @@ Data Backup Process – Exporting the full database schema and data.
 
 Data Restore Process – Importing the backup file and verifying the restored database.
 
+# 🔄  Stage 2 Documentation
 
-
- Stage 2 Documentation
-
-🎯 Stage Overview
+## 🎯 Stage Overview
 
 This stage focuses on data manipulation, business logic enforcement, and system intelligence. 
 
