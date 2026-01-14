@@ -1,3 +1,7 @@
+--Increments the current_amount field in group_of_sports table when a new 
+--student enrollment record is inserted into participate_in table.
+
+
 -- FUNCTION: public.update_current_amount_on_insert()
 
 -- DROP FUNCTION IF EXISTS public.update_current_amount_on_insert();

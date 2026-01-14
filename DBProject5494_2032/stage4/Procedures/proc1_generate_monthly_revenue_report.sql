@@ -1,3 +1,9 @@
+--Generates a formatted monthly revenue report showing income breakdown by sports class, 
+--including student counts, group counts, and revenue calculations. 
+--Uses explicit cursor to process class data and validates input parameters (year and month ranges).
+
+
+
 CREATE OR REPLACE PROCEDURE generate_monthly_revenue_report(
     IN p_year INTEGER,
     IN p_month INTEGER,

@@ -1,3 +1,10 @@
+--Enrolls a single student in multiple groups simultaneously. 
+--Validates student existence, checks group capacity and status, prevents duplicate enrollments, 
+--and provides detailed success/error reporting for each enrollment attempt. 
+--Uses FOREACH loop and exception handling.
+
+
+
 CREATE OR REPLACE PROCEDURE enroll_student_bulk(
     IN p_student_id INTEGER,
     IN p_group_ids INTEGER[],

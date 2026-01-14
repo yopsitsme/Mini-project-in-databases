@@ -1,3 +1,8 @@
+--Automatically updates group status (PENDING/ACTIVE/FULL) and increments current_amount 
+--when a new student is added to participate_in table. 
+--Uses CASE statement to determine status based on minimum requirements (5 students) and capacity limits.
+
+
 -- FUNCTION: public.update_group_status_on_insert()
 
 -- DROP FUNCTION IF EXISTS public.update_group_status_on_insert();

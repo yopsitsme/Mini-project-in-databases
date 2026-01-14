@@ -1,3 +1,9 @@
+-- Returns a table of all courses enrolled by a specific student, 
+--including class details, teacher information, schedule, room location, and cost. 
+--Uses explicit cursor to iterate through 
+--student enrollments and validate student existence before processing.
+
+
 CREATE OR REPLACE FUNCTION get_student_courses(p_student_id INTEGER)
 RETURNS TABLE (
     group_id INTEGER,
