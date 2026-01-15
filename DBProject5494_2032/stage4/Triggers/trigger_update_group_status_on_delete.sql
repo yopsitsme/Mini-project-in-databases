@@ -1,3 +1,7 @@
+--Automatically updates group status and decrements current_amount when a student is removed from participate_in table. 
+--Recalculates status based on remaining student count relative to minimum requirements and capacity.
+
+
 -- FUNCTION: public.update_group_status_on_delete()
 
 -- DROP FUNCTION IF EXISTS public.update_group_status_on_delete();

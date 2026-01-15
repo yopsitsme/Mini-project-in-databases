@@ -1,3 +1,8 @@
+--Calculates and returns a formatted text report of a teacher's workload, including total groups taught, 
+--number of students, weekly hours,and workload status classification (NO_CLASSES, LIGHT, NORMAL, HEAVY, or OVERLOADED). 
+--Includes teacher validation and exception handling.
+
+
 CREATE OR REPLACE FUNCTION public.calculate_teacher_workload(
 	p_teacher_id integer)
     RETURNS text

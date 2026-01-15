@@ -1,3 +1,7 @@
+--Decrements the current_amount field in group_of_sports table when a 
+--student enrollment record is deleted from participate_in table.
+
+
 -- FUNCTION: public.update_current_amount_on_delete()
 
 -- DROP FUNCTION IF EXISTS public.update_current_amount_on_delete();

@@ -1,3 +1,7 @@
+--Validates that a group is not full before allowing a new student enrollment. 
+--Raises an exception if the group has reached capacity, preventing the insert operation from completing.
+
+
 -- FUNCTION: public.check_group_capacity_before_insert()
 
 -- DROP FUNCTION IF EXISTS public.check_group_capacity_before_insert();

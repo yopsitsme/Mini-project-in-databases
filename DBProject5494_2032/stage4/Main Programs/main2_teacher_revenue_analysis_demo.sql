@@ -1,3 +1,8 @@
+--Demonstration script that analyzes a teacher's workload and 
+--generates a monthly revenue report for the entire institution. 
+--Combines teacher-specific metrics with system-wide financial reporting.
+
+
 -- File: teacher_revenue_main.sql
 
 DO $$

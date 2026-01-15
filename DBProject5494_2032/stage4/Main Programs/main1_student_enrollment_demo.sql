@@ -1,3 +1,8 @@
+--Demonstration script that enrolls a student in multiple groups using the bulk enrollment procedure, 
+--then displays the student's complete course schedule using the get_student_courses function. 
+--Includes formatted output and error handling.
+
+
 -- File: student_enrollment_main.sql
 
 DO $$
