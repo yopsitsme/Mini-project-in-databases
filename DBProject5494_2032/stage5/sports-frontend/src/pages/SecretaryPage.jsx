@@ -65,6 +65,16 @@ export const SecretaryPage = ({ onGoHome, onSelectScreen }) => (
                 <h4>הסרת תלמיד מקורסים</h4>
               </button>
             </div>
+
+            <div className="col-md-4">
+              <button
+                onClick={() => onSelectScreen("weekly-schedule")}
+                className="btn btn-info btn-lg w-100 menu-btn"
+              >
+                <i className="bi bi-calendar-week mb-3"></i>
+                <h4>לוח זמנים שבועי</h4>
+              </button>
+            </div>
           </div>
         </div>
       </div>

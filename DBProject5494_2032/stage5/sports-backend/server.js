@@ -12,6 +12,7 @@ const revenueRoutes = require("./src/routes/revenueRoutes");
 const sportsClassRoutes = require("./src/routes/sportsClassRoutes");
 const parentRoutes = require("./src/routes/parentRoutes");
 const yearGroupRoutes = require("./src/routes/yearGroupRoutes");
+const scheduleRoutes = require("./src/routes/scheduleRoutes");
 
 const app = express();
 const PORT = 3001;
@@ -29,6 +30,7 @@ app.use("/api/monthly-revenue", revenueRoutes);
 app.use("/api/sports-classes", sportsClassRoutes);
 app.use("/api/parents", parentRoutes);
 app.use("/api/year-groups", yearGroupRoutes);
+app.use("/api/schedule", scheduleRoutes);
 
 // Health check endpoint
 app.get("/api/health", (req, res) => {

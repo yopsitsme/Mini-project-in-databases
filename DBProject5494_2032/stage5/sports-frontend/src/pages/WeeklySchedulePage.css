@@ -1,0 +1,75 @@
+/* src/pages/WeeklySchedulePage.css */
+
+.weekly-schedule-container {
+  padding: 20px 0;
+}
+
+.schedule-card {
+  border-radius: 8px;
+  transition:
+    transform 0.2s,
+    box-shadow 0.2s;
+}
+
+.schedule-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+.day-header {
+  background: linear-gradient(135deg, #0dcaf0 0%, #0da5c0 100%);
+  color: white;
+  padding: 12px;
+  border-radius: 6px 6px 0 0;
+  font-weight: 600;
+}
+
+.schedule-time-slot {
+  padding: 12px;
+  border-left: 4px solid #0dcaf0;
+  margin-bottom: 10px;
+  background-color: #f8f9fa;
+  border-radius: 4px;
+}
+
+.schedule-time-slot:hover {
+  background-color: #e9ecef;
+}
+
+.course-name {
+  font-weight: 600;
+  color: #0c63e4;
+  margin-bottom: 5px;
+}
+
+.course-info {
+  font-size: 0.85rem;
+  color: #6c757d;
+}
+
+.courses-table {
+  margin-top: 20px;
+}
+
+.courses-table th {
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.9rem;
+  letter-spacing: 0.5px;
+}
+
+.courses-table td {
+  vertical-align: middle;
+}
+
+.empty-state {
+  text-align: center;
+  padding: 40px 20px;
+  color: #6c757d;
+}
+
+.empty-state i {
+  font-size: 3rem;
+  margin-bottom: 15px;
+  opacity: 0.5;
+}

@@ -9,6 +9,7 @@ import { RegisterStudentPage } from "./pages/RegisterStudentPage";
 import { RegisterTeacherPage } from "./pages/RegisterTeacherPage";
 import { EnrollStudentPage } from "./pages/EnrollStudentPage";
 import { DeleteStudentFromCoursePage } from "./pages/DeleteStudentFromCoursePage";
+import { WeeklySchedulePage } from "./pages/WeeklySchedulePage";
 import ResultMessage from "./components/ResultMessage";
 
 const App = () => {
@@ -92,6 +93,11 @@ const App = () => {
             onGoBack={() => handleGoBack("secretary")}
             onShowResult={handleShowResult}
           />
+        );
+
+      case "weekly-schedule":
+        return (
+          <WeeklySchedulePage onGoBack={() => handleGoBack("secretary")} />
         );
 
       case "result":
