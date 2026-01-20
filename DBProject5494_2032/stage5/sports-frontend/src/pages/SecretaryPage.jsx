@@ -45,6 +45,26 @@ export const SecretaryPage = ({ onGoHome, onSelectScreen }) => (
                 <h4>רישום מורה</h4>
               </button>
             </div>
+
+            <div className="col-md-4">
+              <button
+                onClick={() => onSelectScreen("enroll-student")}
+                className="btn btn-primary btn-lg w-100 menu-btn"
+              >
+                <i className="bi bi-person-check-fill mb-3"></i>
+                <h4>הרשמת תלמיד לקורסים</h4>
+              </button>
+            </div>
+
+            <div className="col-md-4">
+              <button
+                onClick={() => onSelectScreen("delete-student-from-course")}
+                className="btn btn-danger btn-lg w-100 menu-btn"
+              >
+                <i className="bi bi-person-x-fill mb-3"></i>
+                <h4>הסרת תלמיד מקורסים</h4>
+              </button>
+            </div>
           </div>
         </div>
       </div>

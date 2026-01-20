@@ -22,6 +22,14 @@ const studentModel = {
     return result.rows;
   },
 
+  // Get enrolled courses for a student
+  async getEnrolledCourses(studentId) {
+    const result = await pool.query("SELECT * FROM get_student_courses($1)", [
+      studentId,
+    ]);
+    return result.rows;
+  },
+
   // Create new student
   async createStudent(client, studentData) {
     const { firstName, lastName, email, phone, birthDate, address, parentId } =
@@ -56,6 +64,17 @@ const studentModel = {
   async enrollStudentBulk(client, studentId, groupIds) {
     const result = await client.query(
       "CALL enroll_student_bulk($1, $2, NULL)",
+      [studentId, groupIds],
+    );
+    return result;
+  },
+
+  // Delete student from courses
+  async deleteEnrollment(client, studentId, groupIds) {
+    // Delete enrollments from participate_in table
+    const result = await client.query(
+      `DELETE FROM participate_in
+       WHERE studentid = $1 AND groupid = ANY($2)`,
       [studentId, groupIds],
     );
     return result;

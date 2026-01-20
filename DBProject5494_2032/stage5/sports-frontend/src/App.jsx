@@ -7,6 +7,8 @@ import { SecretaryPage } from "./pages/SecretaryPage";
 import { RevenuePage } from "./pages/RevenuePage";
 import { RegisterStudentPage } from "./pages/RegisterStudentPage";
 import { RegisterTeacherPage } from "./pages/RegisterTeacherPage";
+import { EnrollStudentPage } from "./pages/EnrollStudentPage";
+import { DeleteStudentFromCoursePage } from "./pages/DeleteStudentFromCoursePage";
 import ResultMessage from "./components/ResultMessage";
 
 const App = () => {
@@ -71,6 +73,22 @@ const App = () => {
       case "register-teacher":
         return (
           <RegisterTeacherPage
+            onGoBack={() => handleGoBack("secretary")}
+            onShowResult={handleShowResult}
+          />
+        );
+
+      case "enroll-student":
+        return (
+          <EnrollStudentPage
+            onGoBack={() => handleGoBack("secretary")}
+            onShowResult={handleShowResult}
+          />
+        );
+
+      case "delete-student-from-course":
+        return (
+          <DeleteStudentFromCoursePage
             onGoBack={() => handleGoBack("secretary")}
             onShowResult={handleShowResult}
           />

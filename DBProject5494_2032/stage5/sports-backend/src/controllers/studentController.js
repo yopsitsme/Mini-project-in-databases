@@ -61,6 +61,19 @@ const studentController = {
     }
   },
 
+  // Get enrolled courses for a student
+  async getEnrolledCourses(req, res) {
+    const { studentId } = req.params;
+
+    try {
+      const result = await studentModel.getEnrolledCourses(studentId);
+      res.json(result);
+    } catch (error) {
+      console.error("Error fetching enrolled courses:", error);
+      res.status(500).json({ error: error.message });
+    }
+  },
+
   // Create new student
   async createStudent(req, res) {
     const { firstName, lastName, email, phone, birthDate, address, parentId } =
@@ -144,6 +157,49 @@ const studentController = {
         console.error("Rollback error:", rollbackError);
       }
       console.error("Error enrolling student:", error);
+      res.status(500).json({ error: error.message });
+    } finally {
+      client.release();
+    }
+  },
+
+  // Delete student from courses
+  async deleteEnrollment(req, res) {
+    const { studentId, groupIds } = req.body;
+
+    // Validate input
+    if (!studentId) {
+      return res.status(400).json({ error: "Student ID is required" });
+    }
+
+    if (!groupIds || !Array.isArray(groupIds) || groupIds.length === 0) {
+      return res
+        .status(400)
+        .json({ error: "At least one group ID is required" });
+    }
+
+    const pool = require("../config/database");
+    const client = await pool.connect();
+
+    try {
+      await client.query("BEGIN");
+
+      await studentModel.deleteEnrollment(client, studentId, groupIds);
+
+      await client.query("COMMIT");
+
+      res.json({
+        message: "Deletion completed successfully",
+        studentId: studentId,
+        groupIds: groupIds,
+      });
+    } catch (error) {
+      try {
+        await client.query("ROLLBACK");
+      } catch (rollbackError) {
+        console.error("Rollback error:", rollbackError);
+      }
+      console.error("Error deleting enrollment:", error);
       res.status(500).json({ error: error.message });
     } finally {
       client.release();

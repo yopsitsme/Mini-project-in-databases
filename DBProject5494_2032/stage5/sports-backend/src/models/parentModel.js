@@ -5,7 +5,10 @@ const parentModel = {
   // Get all parents
   async getAllParents() {
     const result = await pool.query(
-      "SELECT * FROM person ORDER BY first_name, last_name",
+      `SELECT DISTINCT p.personid, p.first_name, p.last_name, p.email, p.phone, p.birth_date
+       FROM person p
+       WHERE p.personid IN (SELECT parentid FROM student WHERE parentid IS NOT NULL)
+       ORDER BY p.first_name, p.last_name`,
     );
     return result.rows;
   },
