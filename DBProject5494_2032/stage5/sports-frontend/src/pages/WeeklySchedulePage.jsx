@@ -34,10 +34,16 @@ export const WeeklySchedulePage = ({ onGoBack }) => {
       );
       if (!scheduleResponse.ok) {
         const errorText = await scheduleResponse.text();
-        throw new Error(`Failed to fetch weekly schedule: ${errorText}`);
+        throw new Error(
+          `Failed to fetch weekly schedule: ${scheduleResponse.status} - ${errorText}`,
+        );
       }
       const scheduleData = await scheduleResponse.json();
       console.log("Schedule data received:", scheduleData);
+      console.log(
+        "Schedule data structure:",
+        scheduleData.length > 0 ? scheduleData[0] : "empty",
+      );
       setSchedule(scheduleData || []);
 
       // Fetch all courses
@@ -46,28 +52,54 @@ export const WeeklySchedulePage = ({ onGoBack }) => {
       );
       if (!coursesResponse.ok) {
         const errorText = await coursesResponse.text();
-        throw new Error(`Failed to fetch courses: ${errorText}`);
+        throw new Error(
+          `Failed to fetch courses: ${coursesResponse.status} - ${errorText}`,
+        );
       }
       const coursesData = await coursesResponse.json();
       console.log("Courses data received:", coursesData);
       setCourses(coursesData || []);
     } catch (err) {
-      setError(err.message);
-      console.error("Error fetching data:", err);
+      console.error("Error in fetchData:", err);
+      setError(
+        err.message ||
+          "Failed to connect to the server. Please make sure the backend is running on http://localhost:3001",
+      );
     } finally {
       setLoading(false);
     }
   };
 
-  // Group schedule by day of week
+  // Group schedule by day of week - convert day_of_week to number if needed
   const scheduleByDay = {};
-  schedule.forEach((item) => {
-    const day = item.day_of_week;
-    if (!scheduleByDay[day]) {
-      scheduleByDay[day] = [];
-    }
-    scheduleByDay[day].push(item);
+  // Initialize all days
+  daysOfWeek.forEach((day) => {
+    scheduleByDay[day.dayNum] = [];
   });
+
+  // Populate with actual schedule data
+  schedule.forEach((item) => {
+    const day = parseInt(item.day_of_week) || item.day_of_week;
+    console.log(
+      "Processing item with day_of_week:",
+      item.day_of_week,
+      "parsed as:",
+      day,
+      "item:",
+      item,
+    );
+    if (scheduleByDay[day]) {
+      scheduleByDay[day].push(item);
+    } else {
+      console.warn(
+        "No matching day found for:",
+        day,
+        "Available days:",
+        Object.keys(scheduleByDay),
+      );
+    }
+  });
+  console.log("Final schedule grouped by day:", scheduleByDay);
 
   return (
     <div className="screen-container bg-info-subtle">
@@ -98,64 +130,53 @@ export const WeeklySchedulePage = ({ onGoBack }) => {
                 </div>
               </div>
             ) : (
-              <div className="row g-3">
-                {[1, 2, 3, 4, 5, 6, 7].map((day) => (
-                  <div key={day} className="col-md-6 col-lg-4">
-                    <div className="card border-info h-100">
-                      <div className="card-header bg-light">
-                        <h5 className="mb-0 text-info">
-                          יום {getDayName(day)}
-                        </h5>
-                      </div>
-                      <div className="card-body">
-                        {scheduleByDay[day] && scheduleByDay[day].length > 0 ? (
-                          <div className="table-responsive">
-                            <table className="table table-sm table-hover">
-                              <tbody>
-                                {scheduleByDay[day].map((item, idx) => (
-                                  <tr key={idx}>
-                                    <td>
-                                      <small className="text-muted">
-                                        {item.start_hour}:00 -{" "}
-                                        {item.end_time
-                                          ? new Date(item.end_time).getHours()
-                                          : ""}
-                                        {item.end_time
-                                          ? ":" +
-                                            new Date(item.end_time)
-                                              .getMinutes()
-                                              .toString()
-                                              .padStart(2, "0")
-                                          : ""}
-                                      </small>
-                                      <br />
-                                      <strong className="text-primary">
-                                        {item.classes_offered || "שיעור"}
-                                      </strong>
-                                      <br />
-                                      <small className="text-success">
-                                        {item.groups_at_time || 0} קבוצ
-                                        {item.groups_at_time === 1 ? "ה" : "ות"}
-                                      </small>
-                                      <br />
-                                      <small className="text-warning">
-                                        {item.total_students || 0} תלמידים
-                                      </small>
-                                    </td>
-                                  </tr>
-                                ))}
-                              </tbody>
-                            </table>
+              <div className="table-responsive">
+                <table className="table table-bordered">
+                  <thead>
+                    <tr className="table-light">
+                      {daysOfWeek.map((day) => (
+                        <th key={day.dayNum} className="text-center">
+                          {day.he}
+                          <br />
+                          <small className="text-muted">{day.en}</small>
+                        </th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      {daysOfWeek.map((day) => (
+                        <td key={day.dayNum} className="day-cell">
+                          <div className="classes-container">
+                            {scheduleByDay[day.dayNum] &&
+                            scheduleByDay[day.dayNum].length > 0 ? (
+                              scheduleByDay[day.dayNum].map((item, idx) => (
+                                <div key={idx} className="class-card mb-2">
+                                  <strong className="text-primary">
+                                    {item.classes_offered}
+                                  </strong>
+                                  <div className="small text-muted">
+                                    שעה: {item.start_hour}:00
+                                  </div>
+                                  <div className="small text-success">
+                                    קבוצות: {item.groups_at_time}
+                                  </div>
+                                  <div className="small text-warning">
+                                    תלמידים: {item.total_students}
+                                  </div>
+                                </div>
+                              ))
+                            ) : (
+                              <div className="text-muted small">
+                                אין שיעורים
+                              </div>
+                            )}
                           </div>
-                        ) : (
-                          <p className="text-muted text-center mb-0">
-                            אין שיעורים
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                        </td>
+                      ))}
+                    </tr>
+                  </tbody>
+                </table>
               </div>
             )}
           </div>
