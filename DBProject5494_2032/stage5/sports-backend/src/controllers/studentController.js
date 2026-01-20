@@ -1,5 +1,8 @@
 // controllers/studentController.js
 const studentModel = require("../models/studentModel");
+const fs = require("fs");
+const path = require("path");
+const pool = require("../config/database");
 
 const studentController = {
   // Get student schedule
@@ -70,6 +73,32 @@ const studentController = {
       res.json(result);
     } catch (error) {
       console.error("Error fetching enrolled courses:", error);
+      res.status(500).json({ error: error.message });
+    }
+  },
+
+  // Get students enrolled in more than one active course
+  async getBusyActiveStudents(req, res) {
+    try {
+      // Load SQL from the maintained query file (do not copy the SQL here)
+      const sqlPath = path.join(
+        __dirname,
+        "..",
+        "..",
+        "..",
+        "updated queries",
+        "query5_students_enrolled_in_multiple_classes.sql",
+      );
+
+      const sql = fs.readFileSync(sqlPath, "utf8");
+
+      // Execute the SQL directly
+      const { rows } = await pool.query(sql);
+
+      // Return rows as JSON
+      res.json(rows);
+    } catch (error) {
+      console.error("Error fetching busy active students:", error);
       res.status(500).json({ error: error.message });
     }
   },

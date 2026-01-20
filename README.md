@@ -2449,3 +2449,9 @@ Potential areas for expansion:
 All execution screenshots demonstrating successful operation of functions, procedures, triggers, and main programs are included in the project folder as referenced throughout this document.
 
 
+
+# 🔄 Database Integration Project - Stage 5
+## Creating a graphical interface for working with the database
+
+Everything is explained in the md's files inside stage5 folder. 
+

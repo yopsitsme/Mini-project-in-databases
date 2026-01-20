@@ -15,6 +15,9 @@ router.get(
 // Get all students
 router.get("/", studentController.getAllStudents);
 
+// Get students enrolled in more than one active course (busy/active students)
+router.get("/busy-active", studentController.getBusyActiveStudents);
+
 // Create new student
 router.post("/", studentController.createStudent);
 

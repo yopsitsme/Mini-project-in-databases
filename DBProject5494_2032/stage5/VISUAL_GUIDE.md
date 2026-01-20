@@ -4,21 +4,21 @@
 
 ```
 ┌─────────────────────────────────────────────────────────┐
-│                    HTTP REQUEST                          │
+│                    HTTP REQUEST                         │
 └────────────────────────┬────────────────────────────────┘
                          │
                          ▼
         ┌────────────────────────────────┐
-        │       server.js                 │
+        │       server.js                │
         │    (Main Entry Point)          │
         └────────────┬───────────────────┘
                      │
                      ▼
         ┌────────────────────────────────┐
-        │      ROUTES (URL Mapping)       │
-        │  /api/teachers                  │
-        │  /api/students                  │
-        │  /api/groups                    │
+        │      ROUTES (URL Mapping)      │
+        │  /api/teachers                 │
+        │  /api/students                 │
+        │  /api/groups                   │
         └────────────┬───────────────────┘
                      │
                      ▼
@@ -49,20 +49,23 @@
 
 ```
 ┌──────────────────────────────────────┐
-│        Browser / User                 │
+│        Browser / User                │
 └────────────┬─────────────────────────┘
              │
              ▼
-  ┌──────────────────────────────┐
-  │    PAGES (Main Screens)      │
-  │  ├─ HomePage                 │
-  │  ├─ TeacherPage              │
-  │  ├─ StudentPage              │
-  │  ├─ SecretaryPage            │
-  │  ├─ RevenuePage              │
-  │  ├─ RegisterStudentPage      │
-  │  └─ RegisterTeacherPage      │
-  └────────────┬─────────────────┘
+  ┌─────────────────────────────────┐
+  │    PAGES (Main Screens)         │
+  │  ├─ HomePage                    │
+  │  ├─ TeacherPage                 │
+  │  ├─ StudentPage                 │
+  │  ├─ SecretaryPage               │
+  │  ├─ RevenuePage                 │
+  │  ├─ RegisterStudentPage         │
+  │  ├─ RegisterTeacherPage         │
+  │  ├─ EnrollStudentPage           │
+  │  ├─ DeleteStudentFromCoursePage │
+  │  └─ WeeklySchedulePage          │
+  └────────────┬────────────────────┘
                │
                ▼
   ┌──────────────────────────────┐
@@ -94,75 +97,6 @@
   └──────────────────────────────┘
 ```
 
-## File Organization Structure
-
-```
-sports-backend/src/
-│
-├─ config/
-│  └─ database.js
-│     (PostgreSQL connection pool)
-│
-├─ models/
-│  ├─ teacherModel.js
-│  ├─ studentModel.js
-│  ├─ groupModel.js
-│  ├─ revenueModel.js
-│  ├─ sportsClassModel.js
-│  ├─ parentModel.js
-│  └─ yearGroupModel.js
-│
-├─ controllers/
-│  ├─ teacherController.js
-│  ├─ studentController.js
-│  ├─ groupController.js
-│  ├─ revenueController.js
-│  ├─ sportsClassController.js
-│  ├─ parentController.js
-│  └─ yearGroupController.js
-│
-├─ routes/
-│  ├─ teacherRoutes.js
-│  ├─ studentRoutes.js
-│  ├─ groupRoutes.js
-│  ├─ revenueRoutes.js
-│  ├─ sportsClassRoutes.js
-│  ├─ parentRoutes.js
-│  └─ yearGroupRoutes.js
-│
-└─ middleware/
-   ├─ corsMiddleware.js
-   ├─ errorHandler.js
-   └─ requestLogger.js
-
-sports-frontend/src/
-│
-├─ pages/
-│  ├─ HomePage.jsx
-│  ├─ TeacherPage.jsx
-│  ├─ StudentPage.jsx
-│  ├─ SecretaryPage.jsx
-│  ├─ RevenuePage.jsx
-│  ├─ RegisterStudentPage.jsx
-│  └─ RegisterTeacherPage.jsx
-│
-├─ components/
-│  ├─ ScheduleDisplay.jsx
-│  └─ ResultMessage.jsx
-│
-├─ utils/
-│  ├─ apiService.js
-│  └─ dayMapping.js
-│
-├─ hooks/
-│  (Ready for custom hooks)
-│
-├─ App.jsx
-│  (Main router)
-│
-└─ ...styles & assets
-```
-
 ## Request-Response Flow (Example)
 
 ```
@@ -182,10 +116,10 @@ USER INTERACTION
                ▼
 ┌─────────────────────────────────────┐
 │  Util: apiService.js                │
-│  getTeacherSchedule(1)              │
+│  getTeacherSchedule(151)            │
 │                                     │
 │  Makes HTTP request                 │
-│  GET /api/teachers/schedule/1       │
+│  GET /api/teachers/schedule/151     │
 └──────────────┬──────────────────────┘
                │
                │ HTTP Request over network
@@ -271,137 +205,3 @@ USER INTERACTION
 │  [Display formatted schedule table] │
 └─────────────────────────────────────┘
 ```
-
-## Data Flow Summary
-
-```
-Frontend          Backend          Database
-───────────────────────────────────────────
-
-User Action   →   Page Component
-              →   API Service
-                  ↓
-                  HTTP Request
-                  ↓
-              Router (URL match)
-              ↓
-              Controller (logic)
-              ↓
-              Model (query build)
-              ↓                          PostgreSQL
-              Pool.query() ──────────→  [Execute]
-                              ←────    [Results]
-              ↑ Receive rows
-              ↓
-              Model (return data)
-              ↓
-              Controller (format)
-              ↓
-                  HTTP Response
-                  ↓
-                  Promise
-              ↓
-              API Service
-              ↓
-              Page Component
-              ↓
-              Re-render UI  ← Display to user
-```
-
-## Component Hierarchy
-
-```
-App.jsx
-│
-├─ HomePage
-│
-├─ TeacherPage
-│  └─ ScheduleDisplay (component)
-│
-├─ StudentPage
-│  └─ ScheduleDisplay (component)
-│
-├─ SecretaryPage
-│
-├─ RevenuePage
-│
-├─ RegisterStudentPage
-│
-├─ RegisterTeacherPage
-│
-└─ ResultMessage (component)
-```
-
-## API Endpoint Hierarchy
-
-```
-/api/
-│
-├─ /teachers
-│  ├─ GET /              (all teachers)
-│  ├─ GET /workload/:id
-│  ├─ GET /schedule/:id
-│  └─ POST /             (create)
-│
-├─ /students
-│  ├─ GET /              (all students)
-│  ├─ GET /schedule/:id
-│  ├─ POST /             (create)
-│  └─ POST /enroll       (enroll)
-│
-├─ /groups
-│  ├─ GET /              (all groups)
-│  ├─ POST /             (create)
-│  └─ PATCH /:id/assign-teacher
-│
-├─ /monthly-revenue
-│  └─ GET /:year/:month
-│
-├─ /sports-classes
-│  ├─ GET /              (all)
-│  └─ POST /             (create)
-│
-├─ /parents
-│  ├─ GET /              (all)
-│  └─ POST /             (create)
-│
-└─ /year-groups
-   └─ GET /              (all)
-```
-
-## Development Workflow
-
-```
-Developer starts work
-        │
-        ▼
-1. Create Database Query
-   └─ Add to models/
-        │
-        ▼
-2. Create Business Logic
-   └─ Add to controllers/
-        │
-        ▼
-3. Create Route
-   └─ Add to routes/
-        │
-        ▼
-4. Create API Call Method
-   └─ Add to utils/apiService.js
-        │
-        ▼
-5. Create UI Component
-   └─ Add to pages/ or components/
-        │
-        ▼
-6. Test in Browser
-   └─ Verify functionality
-        │
-        ▼
-Feature Complete! ✅
-```
-
----
-
-**These visual guides help understand how all parts work together!**
