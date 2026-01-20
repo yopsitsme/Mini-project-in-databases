@@ -1,0 +1,143 @@
+/* App.css */
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  direction: rtl;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  min-height: 100vh;
+}
+
+.home-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.home-card {
+  max-width: 900px;
+  width: 100%;
+  border-radius: 20px;
+  border: none;
+}
+
+.home-icon {
+  font-size: 4rem;
+  color: #667eea;
+}
+
+.screen-container {
+  min-height: 100vh;
+  padding: 20px;
+}
+
+.menu-btn {
+  height: 180px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-radius: 15px;
+  border: none;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.menu-btn:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+}
+
+.menu-btn i {
+  font-size: 3rem;
+  display: block;
+}
+
+.menu-btn h3, .menu-btn h4 {
+  margin: 0;
+  font-weight: bold;
+}
+
+.card {
+  border-radius: 15px;
+  border: none;
+}
+
+.card-header {
+  border-radius: 15px 15px 0 0 !important;
+  padding: 1.5rem;
+}
+
+.day-cell {
+  min-width: 120px;
+  padding: 10px;
+  background-color: #f8f9fa;
+}
+
+.class-card {
+  background: white;
+  border: 1px solid #dee2e6;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.classes-container {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+pre {
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  overflow-x: auto;
+  font-size: 0.9rem;
+  direction: ltr;
+  text-align: left;
+}
+
+.alert {
+  border-radius: 10px;
+}
+
+.form-control:focus {
+  box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+  border-color: #667eea;
+}
+
+.btn {
+  border-radius: 10px;
+  font-weight: 600;
+  transition: all 0.3s ease;
+}
+
+.btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-lg {
+  padding: 0.75rem 1.5rem;
+  font-size: 1.1rem;
+}
+
+@media (max-width: 768px) {
+  .menu-btn {
+    height: 140px;
+  }
+  
+  .menu-btn i {
+    font-size: 2rem;
+  }
+  
+  .home-icon {
+    font-size: 3rem;
+  }
+  
+  .day-cell {
+    min-width: 100px;
+  }
+}
